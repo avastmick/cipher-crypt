@@ -15,6 +15,9 @@ documentation = "https://docs.rs/cipher-crypt/"
 name = "cipher_crypt"
 
 [dependencies]
+clap = "2"
+assert_cli = "0.5"
+colored = "1.6"
 lazy_static = "*"
 maplit = "*"
 num = "^0.1"
