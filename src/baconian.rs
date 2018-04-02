@@ -1,22 +1,16 @@
-//! Bacon's cipher or the Baconian cipher is a method of steganography
-//! (a method of hiding a secret message as opposed to just a cipher) devised by Francis Bacon in 1605.
-//! A message is concealed in the presentation of text, rather than its content.
+//! Bacon's cipher or the Baconian cipher is a method of _steganography_
+//! - a method of hiding a secret message in plain sight rather generating ciphertext.
+//! It was devised by Sir Francis Bacon in 1605.
 //!
-//! Each character of the message plaintext is encoded as a 5-bit binary,
-//!  these are then "hidden" in a decoy message through the use of font variation.
+//! Each character of the plaintext message is encoded as a 5-bit binary character.
+//! These characters are then "hidden" in a decoy message through the use of font variation.
+//! This cipher is very easy to crack once the method of hiding is known. As such, this implementation includes
+//! the option to set whether the substitution is distinct for the whole alphabet,
+//! or whether it follows the classical method of treating 'I' and 'J', and 'U' and 'V' as
+//! interchangeable characters - as would have been the case in Bacon's time.
 //!
-//! This cipher is very easy to crack, once the method of hiding is known, therefore this
-//! implementation includes the options to set whether the substitution is distinct for the whole
-//! alphabet, or whether it follows the classical method of treating 'I' and 'J', and 'U' and 'V'
-//! as interchangeable characters, as would have been the case in Bacon's time, though 'I' and 'V'
-//! were more common in text.
-//!
-//! Also, it allows the user to change the underlying binary
-//! character choice, this is traditionally 'a' and 'b', but optionally the user can choose any
-//! pair of characters.
-//!
-//! If no concealing text is given and boilerplate of "Loren ipsum..." is used, given the capacity
-//! to hide up to a 50 character plaintext.
+//! If no concealing text is given and the boilerplate of "Lorem ipsum..." is used,
+//! a plaintext message of up to 50 characters may be hidden.
 //!
 use std::collections::HashMap;
 use std::string::String;
@@ -33,42 +27,8 @@ const CODE_LEN: usize = 5;
 /// Code mappings:
 ///  * note: that str is preferred over char as it cannot be guaranteed that
 ///     there will be a single codepoint for a given character.
-
-/// A traditional code set that makes 'I' = 'J' and 'V' = 'U'
-///     - as they had equivalent value in Bacon's day
-///     - generally, 'I' and 'V' were more common and used here
 lazy_static! {
-    static ref TRAD_CODES: HashMap<&'static str, &'static str> = hashmap!{
-        "A" => "AAAAA",
-        "B" => "AAAAB",
-        "C" => "AAABA",
-        "D" => "AAABB",
-        "E" => "AABAA",
-        "F" => "AABAB",
-        "G" => "AABBA",
-        "H" => "AABBB",
-        "I" => "ABAAA",
-        "K" => "ABAAB",
-        "L" => "ABABA",
-        "M" => "ABABB",
-        "N" => "ABBAA",
-        "O" => "ABBAB",
-        "P" => "ABBBA",
-        "Q" => "ABBBB",
-        "R" => "BAAAA",
-        "S" => "BAAAB",
-        "T" => "BAABA",
-        "V" => "BAABB",
-        "W" => "BABAA",
-        "X" => "BABAB",
-        "Y" => "BABBA",
-        "Z" => "BABBB",
-    };
-}
-
-/// A distinct code set that covers all of the alphabet
-lazy_static! {
-    static ref DISTINCT_CODES: HashMap<&'static str, &'static str> = hashmap!{
+    static ref CODE_MAP: HashMap<&'static str, &'static str> = hashmap!{
         "A" => "AAAAA",
         "B" => "AAAAB",
         "C" => "AAABA",
@@ -161,37 +121,27 @@ lazy_static! {
 /// Get the code for a given key (source character)
 fn get_code(distinct: bool, key: &str) -> String {
     let mut code = String::new();
-    if distinct {
-        if DISTINCT_CODES.contains_key(key.to_uppercase().as_str()) {
-            code.push_str(DISTINCT_CODES.get(key.to_uppercase().as_str()).unwrap());
-        }
-    } else {
-        // Need to handle 'I'/'J' and 'U'/'V'
-        let mut key_upper = key.to_uppercase();
-
+    // Need to handle 'I'/'J' and 'U'/'V'
+    //  for traditional usage.
+    let mut key_upper = key.to_uppercase();
+    if !distinct {
         match key_upper.as_str() {
             "J" => key_upper = "I".to_string(),
             "U" => key_upper = "V".to_string(),
             _ => {}
         }
-        if TRAD_CODES.contains_key(key_upper.as_str()) {
-            code.push_str(TRAD_CODES.get(key_upper.as_str()).unwrap());
-        }
     }
-
+    if CODE_MAP.contains_key(key_upper.as_str()) {
+        code.push_str(CODE_MAP.get(key_upper.as_str()).unwrap());
+    }
     code
 }
 
 /// Gets the key (the source character) for a given cipher text code
-fn get_key(distinct: bool, code: &str) -> String {
+fn get_key(code: &str) -> String {
     let mut key = String::new();
 
-    let codes = if distinct {
-        DISTINCT_CODES.iter()
-    } else {
-        TRAD_CODES.iter()
-    };
-    for (_key, val) in codes {
+    for (_key, val) in CODE_MAP.iter() {
         if val == &code {
             key.push_str(_key);
         }
@@ -244,7 +194,7 @@ impl Cipher for Baconian {
     ///
     /// let b = Baconian::new((false, None)).unwrap();
     /// let message = "Hello";
-    /// let cipher_text = "Lo𝘳𝘦𝘮 ip𝘴um d𝘰l𝘰r s𝘪t 𝘢me𝘵, 𝘯e 𝘵";
+    /// let cipher_text = "Lo𝘳𝘦𝘮 ip𝘴um d𝘰l𝘰𝘳 s𝘪t 𝘢𝘮e𝘵, 𝘯𝘦 t";
     ///
     /// assert_eq!(cipher_text, b.encrypt(message).unwrap());
     /// ```
@@ -288,12 +238,17 @@ impl Cipher for Baconian {
             }
         }
         decoy_slice.truncate(alphas + non_alphas);
-
+        // We now have an encoded message, `secret`, in which each character of of the
+        // original plaintext is now represented by a 5-bit binary character,
+        // "AAAAA", "ABABA" etc.
+        // We now overlay the encoded text onto the decoy slice, and
+        // where the binary 'B' is found the decoy slice char is swapped for an italic
         let mut decoy_msg = String::new();
         for c in decoy_slice.chars() {
             if c.is_alphabetic() {
                 match secret.remove(0) {
                     'B' => {
+                        // match the binary 'B' and swap for italic
                         let italic = ITALIC_CODES.get(c.to_string().as_str());
                         decoy_msg.push(*italic.unwrap());
                     }
@@ -316,7 +271,7 @@ impl Cipher for Baconian {
     /// use cipher_crypt::{Cipher, Baconian};
     ///
     /// let b = Baconian::new((false, None)).unwrap();
-    /// let cipher_text = "Lo𝘳𝘦𝘮 ip𝘴um d𝘰l𝘰r s𝘪t 𝘢me𝘵, 𝘯e 𝘵";
+    /// let cipher_text = "Lo𝘳𝘦𝘮 ip𝘴um d𝘰l𝘰𝘳 s𝘪t 𝘢𝘮e𝘵, 𝘯𝘦 t";
     ///
     /// assert_eq!("HELLO", b.decrypt(cipher_text).unwrap());
     /// ```
@@ -349,7 +304,7 @@ impl Cipher for Baconian {
             code.push(c);
             // If we have the right length code
             if code.len() == CODE_LEN {
-                plaintext += &get_key(self.distinct, &code);
+                plaintext += &get_key(&code);
                 code.clear();
             }
         }
@@ -365,8 +320,20 @@ mod tests {
     fn encrypt_simple() {
         let b = Baconian::new((false, None)).unwrap();
         let message = "Hello";
-        let cipher_text = "Lo𝘳𝘦𝘮 ip𝘴um d𝘰l𝘰r s𝘪t 𝘢me𝘵, 𝘯e 𝘵";
+        let cipher_text = "Lo𝘳𝘦𝘮 ip𝘴um d𝘰l𝘰𝘳 s𝘪t 𝘢𝘮e𝘵, 𝘯𝘦 t";
         assert_eq!(cipher_text, b.encrypt(message).unwrap());
+    }
+    // Need to test that the traditional and distinct codes give different results
+    #[test]
+    fn encrypt_trad_v_dist() {
+        let b_trad = Baconian::new((false, None)).unwrap();
+        let b_dist = Baconian::new((true, None)).unwrap();
+        let message = "I JADE YOU VERVENT UNICORN";
+
+        assert_ne!(
+            b_dist.encrypt(&message).unwrap(),
+            b_trad.encrypt(message).unwrap()
+        );
     }
 
     #[test]
@@ -387,9 +354,9 @@ mod tests {
         let b = Baconian::new((false, Some(decoy_text))).unwrap();
         let message = "Peace, Freedom 🗡️ and Liberty!";
         let cipher_text =
-            "T𝘩𝘦 𝘸orl𝘥's a bubble; an𝘥 the 𝘭ife o𝘧 m𝘢𝘯 less th𝘢n a sp𝘢n. \
-            In hi𝘴 𝘤o𝘯𝘤e𝘱t𝘪o𝘯 𝘸retche𝘥; 𝘧rom th𝘦 𝘸o𝘮b 𝘴o t𝘰 the tomb: \
-            𝐶ur𝘴t f𝘳om th𝘦 cr𝘢d𝘭e, 𝘢𝘯d";
+            "T𝘩𝘦 𝘸𝘰rl𝘥\'s a bubble; an𝘥 the 𝘭ife o𝘧 m𝘢𝘯 les𝘴 th𝘢n a sp𝘢n. \
+            In hi𝘴 𝘤o𝘯𝘤𝘦pt𝘪𝘰n wretche𝘥; 𝘧r𝘰m th𝘦 𝘸o𝘮b 𝘴𝘰 t𝘰 the tomb: \
+            𝐶ur𝘴t f𝘳om t𝘩𝘦 cr𝘢𝘥𝘭𝘦, and";
         assert_eq!(cipher_text, b.encrypt(message).unwrap());
     }
     // distinct lexicon
@@ -442,9 +409,9 @@ mod tests {
     fn decrypt_traditional() {
         let cipher_text =
             String::from(
-                "T𝘩e wor𝘭d's a bubble; an𝘥 𝘵he 𝘭if𝘦 o𝘧 𝘮an 𝘭𝘦s𝘴 𝘵ha𝘯 𝘢 𝘴pa𝘯. \
-                𝐼n h𝘪s c𝘰ncep𝘵io𝘯 𝘸re𝘵che𝘥; 𝘧ro𝘮 th𝘦 w𝘰mb 𝘴𝘰 t𝘰 𝘵he t𝘰mb: \
-                Curs𝘵 fr𝘰𝘮 t𝘩𝘦 cradl𝘦, 𝘢nd"
+                "T𝘩e wor𝘭d's a bubble; an𝘥 𝘵he 𝘭if𝘦 𝘰f man 𝘭𝘦𝘴s 𝘵h𝘢n 𝘢 𝘴p𝘢n. \
+                𝐼n h𝘪s c𝘰nce𝘱𝘵i𝘰n 𝘸re𝘵che𝘥; 𝘧r𝘰𝘮 th𝘦 𝘸𝘰m𝘣 s𝘰 t𝘰 𝘵h𝘦 t𝘰mb: \
+                Curs𝘵 fr𝘰𝘮 𝘵h𝘦 cra𝘥l𝘦, 𝘢n𝘥"
             );
         // Note: the substitution for 'I'/'J' and 'U'/'V'
         let message = "IIADEYOVVERVENTVNICORN";
