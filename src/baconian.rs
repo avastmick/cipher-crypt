@@ -249,8 +249,8 @@ impl Cipher for Baconian {
                 match secret.remove(0) {
                     'B' => {
                         // match the binary 'B' and swap for italic
-                        let italic = ITALIC_CODES.get(c.to_string().as_str());
-                        decoy_msg.push(*italic.unwrap());
+                        let italic = *ITALIC_CODES.get(c.to_string().as_str()).unwrap();
+                        decoy_msg.push(italic);
                     }
                     _ => decoy_msg.push(c),
                 }
