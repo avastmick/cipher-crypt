@@ -21,14 +21,10 @@ fn main() {
         .get_matches();
 
     if matches.is_present("list") {
-
-        println!(
-            "List out all the modules of cipher_crypt",
-        );
+        println!("List out all the modules of cipher_crypt",);
     } else {
         panic!("Nothing asked to do! Try -h, --help")
     }
-
 }
 
 extern crate assert_cli;
