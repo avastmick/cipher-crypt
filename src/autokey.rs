@@ -4,9 +4,9 @@
 //! For example, say the message was `ATTACK AT DAWN` and the key was `CRYPT` then the calculated
 //! keystream would be `CRYPTA TT ACKA`. It was invented by Blaise de Vigenère in 1586, and is
 //! generally more secure than the Vigenere cipher.
+use common::alphabet::Alphabet;
 use common::cipher::Cipher;
 use common::{alphabet, substitute};
-use common::alphabet::Alphabet;
 
 /// An Autokey cipher.
 ///
@@ -187,9 +187,7 @@ mod tests {
         let v = Autokey::new(String::from("lemon")).unwrap();
 
         assert_eq!(
-            vec![
-                'l', 'e', 'm', 'o', 'n', 'W', 'e', 'a', 'r', 'e', 'u', 'n', 'd', 'e', 'r'
-            ],
+            vec!['l', 'e', 'm', 'o', 'n', 'W', 'e', 'a', 'r', 'e', 'u', 'n', 'd', 'e', 'r'],
             v.encrypt_keystream(message)
         );
     }

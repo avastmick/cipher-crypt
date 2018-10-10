@@ -3,11 +3,11 @@
 //!
 //! For example, given the message `ATTACK AT DAWN` and the key was `CRYPT` then the calculated
 //! encoding key would be `CRYPTC RY PTCR`.
-use std::iter;
-use common::substitute;
 use common::alphabet;
-use common::cipher::Cipher;
 use common::alphabet::Alphabet;
+use common::cipher::Cipher;
+use common::substitute;
+use std::iter;
 
 /// A Vigenère cipher.
 ///
@@ -144,9 +144,7 @@ mod tests {
         let v = Vigenere::new(String::from("lemon")).unwrap(); //key length of 5
 
         assert_eq!(
-            vec![
-                'l', 'e', 'm', 'o', 'n', 'l', 'e', 'm', 'o', 'n', 'l', 'e', 'm', 'o', 'n'
-            ],
+            vec!['l', 'e', 'm', 'o', 'n', 'l', 'e', 'm', 'o', 'n', 'l', 'e', 'm', 'o', 'n'],
             v.keystream(message)
         );
     }

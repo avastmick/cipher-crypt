@@ -3,10 +3,10 @@
 //! ADFGVX was an extension of an earlier cipher called ADFGX. It uses a polybius square and a
 //! columnar transposition cipher.
 //!
-use std::string::String;
+use columnar_transposition::ColumnarTransposition;
 use common::cipher::Cipher;
 use common::{alphabet, keygen};
-use columnar_transposition::ColumnarTransposition;
+use std::string::String;
 use Polybius;
 
 const ADFGVX_CHARS: [char; 6] = ['A', 'D', 'F', 'G', 'V', 'X'];
