@@ -207,7 +207,7 @@ impl FractionatedMorse {
         for morse_seq in trigraphs.split('|') {
             // A double separator signifies message end. As we are splitting on '|',
             // the sequence '||' will produce an empty string.
-            if morse_seq == "" {
+            if morse_seq.is_empty() {
                 break;
             }
 

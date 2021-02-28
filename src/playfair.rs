@@ -91,9 +91,9 @@ impl Cipher for Playfair {
         // Handles Rule 1 (Bigrams)
         let bmsg = self.bigram(&message.to_uppercase());
 
-        self.apply_rules(bmsg, |v, first, second| {
+        Ok(self.apply_rules(bmsg, |v, first, second| {
             (v[(first + 1) % 5], v[(second + 1) % 5])
-        })
+        }))
     }
 
     /// Decrypt a message with the Playfair cipher.
@@ -131,12 +131,12 @@ impl Cipher for Playfair {
         let bmsg = self.bigram(&message.to_uppercase());
 
         //Must be wary of negative wrap-around in modulo
-        self.apply_rules(bmsg, |v, first, second| {
+        Ok(self.apply_rules(bmsg, |v, first, second| {
             (
                 v[first.checked_sub(1).unwrap_or(v.len() - 1)],
                 v[second.checked_sub(1).unwrap_or(v.len() - 1)],
             )
-        })
+        }))
     }
 }
 
@@ -146,7 +146,7 @@ impl Playfair {
     /// The operations for encrypt and decrypt are identical
     /// except for the direction of the substitution choice.
     ///
-    fn apply_rules<F>(&self, bigrams: Vec<Bigram>, shift: F) -> Result<String, &'static str>
+    fn apply_rules<F>(&self, bigrams: Vec<Bigram>, shift: F) -> String
     where
         F: Fn(Vec<char>, usize, usize) -> Bigram,
     {
@@ -167,7 +167,7 @@ impl Playfair {
             text.push(chars.0);
             text.push(chars.1);
         }
-        Ok(text)
+        text
     }
 
     /// Apply rule 1 (bigrams).

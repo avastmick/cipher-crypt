@@ -25,7 +25,7 @@ impl Cipher for Caesar {
     /// * `shift` is not in the inclusive range `1 - 26`.
     ///
     fn new(shift: usize) -> Caesar {
-        if shift < 1 || shift > 26 {
+        if !(1..=26).contains(&shift) {
             panic!("The shift factor must be within the range 1 <= n <= 26.");
         }
 
