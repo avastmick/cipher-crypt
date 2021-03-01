@@ -49,7 +49,7 @@ pub mod rot13;
 pub mod scytale;
 pub mod vigenere;
 
-pub use crate::adfgvx::ADFGVX;
+pub use crate::adfgvx::Adfgvx;
 pub use crate::affine::Affine;
 pub use crate::autokey::Autokey;
 pub use crate::baconian::Baconian;
