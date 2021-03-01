@@ -1,6 +1,6 @@
-//! The ADFGVX cipher was a field cipher used by the German Army on the Western Front during World War I.
+//! The Adfgvx cipher was a field cipher used by the German Army on the Western Front during World War I.
 //!
-//! ADFGVX was an extension of an earlier cipher called ADFGX. It uses a polybius square and a
+//! Adfgvx was an extension of an earlier cipher called ADFGX. It uses a polybius square and a
 //! columnar transposition cipher.
 //!
 use crate::columnar_transposition::ColumnarTransposition;
@@ -12,16 +12,16 @@ use std::string::String;
 const ADFGVX_CHARS: [char; 6] = ['A', 'D', 'F', 'G', 'V', 'X'];
 
 /// This struct is created by the `new()` method. See its documentation for more.
-pub struct ADFGVX {
+pub struct Adfgvx {
     polybius_cipher: Polybius,
     columnar_cipher: ColumnarTransposition,
 }
 
-impl Cipher for ADFGVX {
+impl Cipher for Adfgvx {
     type Key = (String, String, Option<char>);
-    type Algorithm = ADFGVX;
+    type Algorithm = Adfgvx;
 
-    /// Initialise a ADFGVX cipher.
+    /// Initialise a Adfgvx cipher.
     ///
     /// The `key` tuple maps to the following `(String, String, Option<char>) = (polybius_key,
     /// columnar_key, null_char)`. Where ...
@@ -37,29 +37,29 @@ impl Cipher for ADFGVX {
     /// # Panics
     /// * If a non-alphanumeric symbol is part of the key.
     ///
-    fn new(key: (String, String, Option<char>)) -> ADFGVX {
+    fn new(key: (String, String, Option<char>)) -> Adfgvx {
         // Generate the keyed alphabet key for the polybius square
         let p_key = keygen::keyed_alphabet(&key.0, &alphabet::ALPHANUMERIC, false);
 
-        ADFGVX {
+        Adfgvx {
             polybius_cipher: Polybius::new((p_key, ADFGVX_CHARS, ADFGVX_CHARS)),
             columnar_cipher: ColumnarTransposition::new((key.1, key.2)),
         }
     }
 
-    /// Encrypt a message using a ADFGVX cipher.
+    /// Encrypt a message using a Adfgvx cipher.
     ///
     /// # Examples
     /// Basic usage:
     ///
     /// ```
-    /// use cipher_crypt::{Cipher, ADFGVX};
+    /// use cipher_crypt::{Cipher, Adfgvx};
     ///
     /// let polybius_key = String::from("ph0qg64mea1yl2nofdxkr3cvs5zw7bj9uti8");
     /// let columnar_key = String::from("GERMAN");
     /// let null_char = None;
     ///
-    /// let a = ADFGVX::new((
+    /// let a = Adfgvx::new((
     ///     polybius_key,
     ///     columnar_key,
     ///     null_char
@@ -84,19 +84,19 @@ impl Cipher for ADFGVX {
         self.columnar_cipher.encrypt(&step_one)
     }
 
-    /// Decrypt a message using a ADFGVX cipher.
+    /// Decrypt a message using a Adfgvx cipher.
     ///
     /// # Examples
     /// Basic usage:
     ///
     /// ```
-    /// use cipher_crypt::{Cipher, ADFGVX};
+    /// use cipher_crypt::{Cipher, Adfgvx};
     ///
     /// let polybius_key = String::from("ph0qg64mea1yl2nofdxkr3cvs5zw7bj9uti8");
     /// let columnar_key = String::from("GERMAN");
     /// let null_char = None;
     ///
-    /// let a = ADFGVX::new((
+    /// let a = Adfgvx::new((
     ///     polybius_key,
     ///     columnar_key,
     ///     null_char
@@ -127,7 +127,7 @@ mod tests {
 
     #[test]
     fn encrypt_simple() {
-        let a = ADFGVX::new((
+        let a = Adfgvx::new((
             String::from("ph0qg64mea1yl2nofdxkr3cvs5zw7bj9uti8"),
             String::from("GERMAN"),
             None,
@@ -146,7 +146,7 @@ mod tests {
 
     #[test]
     fn encrypt_with_space_padding() {
-        let a = ADFGVX::new((
+        let a = Adfgvx::new((
             String::from("ph0qg64mea1yl2nofdxkr3cvs5zw7bj9uti8"),
             String::from("GERMAN"),
             Some(' '),
@@ -167,7 +167,7 @@ mod tests {
 
     #[test]
     fn decrypt_message() {
-        let a = ADFGVX::new((
+        let a = Adfgvx::new((
             String::from("ph0qg64mea1yl2nofdxkr3cvs5zw7bj9uti8"),
             String::from("GERMAN"),
             None,
@@ -185,7 +185,7 @@ mod tests {
 
     #[test]
     fn decrypt_with_space_padding() {
-        let a = ADFGVX::new((
+        let a = Adfgvx::new((
             String::from("ph0qg64mea1yl2nofdxkr3cvs5zw7bj9uti8"),
             String::from("GERMAN"),
             Some(' '),
@@ -205,7 +205,7 @@ mod tests {
 
     #[test]
     fn simple() {
-        let a = ADFGVX::new((
+        let a = Adfgvx::new((
             String::from("ph0qg64mea1yl2nofdxkr3cvs5zw7bj9uti8"),
             String::from("VICTORY"),
             None,
@@ -223,7 +223,7 @@ mod tests {
 
     #[test]
     fn simple_with_padding() {
-        let a = ADFGVX::new((
+        let a = Adfgvx::new((
             String::from("ph0qg64mea1yl2nofdxkr3cvs5zw7bj9uti8"),
             String::from("VICTORY"),
             Some('\u{0}'),
@@ -241,7 +241,7 @@ mod tests {
 
     #[test]
     fn plaintext_with_padding() {
-        let a = ADFGVX::new((
+        let a = Adfgvx::new((
             String::from("ph0qg64mea1yl2nofdxkr3cvs5zw7bj9uti8"),
             String::from("VICTORY"),
             Some(' '),
@@ -254,7 +254,7 @@ mod tests {
     #[test]
     fn with_utf8() {
         let plain_text = "Attack 🗡️ the east wall";
-        let a = ADFGVX::new((
+        let a = Adfgvx::new((
             String::from("ph0qg64mea1yl2nofdxkr3cvs5zw7bj9uti8"),
             String::from("GERMAN"),
             None,
@@ -269,7 +269,7 @@ mod tests {
     #[test]
     fn with_utf8_with_padding() {
         let plain_text = "Attack 🗡️ the east wall";
-        let a = ADFGVX::new((
+        let a = Adfgvx::new((
             String::from("ph0qg64mea1yl2nofdxkr3cvs5zw7bj9uti8"),
             String::from("GERMAN"),
             Some('\u{0}'),
@@ -284,6 +284,6 @@ mod tests {
     #[test]
     #[should_panic]
     fn invalid_key_phrase() {
-        ADFGVX::new((String::from("F@il"), String::from("GERMAN"), None));
+        Adfgvx::new((String::from("F@il"), String::from("GERMAN"), None));
     }
 }
